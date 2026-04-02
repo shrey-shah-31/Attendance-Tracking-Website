@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>FullStack Attendance Hub | Subjects & Date Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', 'Inter', 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Main dashboard card */
+    .dashboard {
+      max-width: 1300px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(0px);
+      border-radius: 2rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    /* Header area */
+    .hero {
+      background: #1a2a3f;
+      padding: 1.8rem 2rem;
+      color: white;
+      border-bottom: 3px solid #ffb347;
+    }
+
+    .hero h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .hero h1 span {
+      background: #ffb347;
+      padding: 0.3rem 1rem;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1a2a3f;
+    }
+
+    .subhead {
+      margin-top: 0.5rem;
+      opacity: 0.8;
+      font-weight: 400;
+      font-size: 0.95rem;
+    }
+
+    /* date + controls row */
+    .date-controls {
+      background: white;
+      padding: 1.2rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .date-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      padding: 0.4rem 1rem;
+      border-radius: 60px;
+      box-shadow: inset 0 1px 2px #0000, 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .date-picker-group label {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    input[type="date"] {
+      border: 1px solid #cbd5e1;
+      padding: 0.5rem 0.8rem;
+      border-radius: 40px;
+      font-weight: 500;
+      background: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: #eef2ff;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      color: #1f3a5f;
+    }
+
+    .nav-btn:hover {
+      background: #cdd9ff;
+      transform: scale(0.96);
+    }
+
+    /* stats pill */
+    .stats-pill {
+      background: #1e293b;
+      color: white;
+      border-radius: 60px;
+      padding: 0.4rem 1.3rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* subjects container grid */
+    .subjects-section {
+      padding: 2rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+      gap: 1rem;
+    }
+
+    .add-subject {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .add-subject input {
+      padding: 0.6rem 1rem;
+      border-radius: 60px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      width: 200px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .add-subject input:focus {
+      border-color: #ffb347;
+      box-shadow: 0 0 0 2px rgba(255, 180, 71, 0.2);
+    }
+
+    button {
+      background: #1a2a3f;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.85rem;
+    }
+
+    button.secondary {
+      background: #475569;
+    }
+
+    button.danger {
+      background: #b91c1c;
+    }
+
+    button.danger-light {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* subject cards grid */
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .subject-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      border: 1px solid #eef2ff;
+    }
+
+    .subject-card:hover {
+      border-color: #ffcd94;
+      box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    .subject-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subject-name::before {
+      content: "📘";
+      font-size: 1.2rem;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 0.3rem 1rem;
+      border-radius: 60px;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .radio-group input {
+      accent-color: #ffb347;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .remove-subject {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: #94a3b8;
+      transition: 0.2s;
+      padding: 0.2rem 0.4rem;
+      border-radius: 30px;
+    }
+
+    .remove-subject:hover {
+      color: #dc2626;
+      background: #fee2e2;
+      transform: scale(1.05);
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 3rem;
+      background: #fef9e6;
+      border-radius: 2rem;
+      color: #6b4e2e;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      z-index: 999;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    footer {
+      background: #f1f5f9;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.75rem;
+      color: #475569;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 1rem;
+      }
+      .subjects-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <div class="hero">
+    <h1>
+      📋 Attendance Flow 
+      <span>Full Stack • Past & Future</span>
+    </h1>
+    <div class="subhead">Mark present/absent for each subject • Any date (past/today/future) • Auto-saved locally</div>
+  </div>
+
+  <div class="date-controls">
+    <div class="date-picker-group">
+      <label>📅 Select Date:</label>
+      <input type="date" id="attendanceDate" />
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" id="prevDayBtn">◀ Previous Day</button>
+      <button class="nav-btn" id="nextDayBtn">Next Day ▶</button>
+      <button class="nav-btn" id="todayBtn">📆 Today</button>
+    </div>
+    <div class="stats-pill" id="statsDisplay">
+      ✅ Present: 0 / 0
+    </div>
+  </div>
+
+  <div class="subjects-section">
+    <div class="toolbar">
+      <div class="add-subject">
+        <input type="text" id="newSubjectInput" placeholder="e.g., Art, Computer Science" autocomplete="off" />
+        <button id="addSubjectBtn">➕ Add Subject</button>
+        <button id="resetDefaultSubjects" class="secondary">⟳ Reset Default Subjects</button>
+      </div>
+      <small style="color:#475569;">⚡ changes auto-save for each date</small>
+    </div>
+
+    <div id="subjectsContainer">
+      <!-- dynamic subject cards injected here -->
+      <div class="empty-message">Loading subjects...</div>
+    </div>
+  </div>
+  <footer>
+    💾 Persistent storage (localStorage) • Mark attendance for any date (past & future) • Subjects are fully customizable
+  </footer>
+</div>
+<div id="toastMsg" class="toast-msg">✔ Saved</div>
+
+<script>
+  // ---------- STORAGE KEYS ----------
+  const STORAGE_SUBJECTS = "attendance_app_subjects";
+  const ATTENDANCE_PREFIX = "attendance_";   // attendance_YYYY-MM-DD
+
+  // ---------- GLOBAL STATE ----------
+  let subjects = [];            // array of subject names (strings)
+  let currentDate = "";        // YYYY-MM-DD format
+  let currentAttendance = {};   // { "SubjectName": "present" or "absent" }
+
+  // DOM elements
+  const dateInput = document.getElementById("attendanceDate");
+  const subjectsContainer = document.getElementById("subjectsContainer");
+  const statsDisplay = document.getElementById("statsDisplay");
+  const toastMsg = document.getElementById("toastMsg");
+
+  // Helper: show temporary toast
+  function showToast(message, duration = 1500) {
+    toastMsg.textContent = message || "✓ Saved";
+    toastMsg.style.opacity = "1";
+    setTimeout(() => {
+      toastMsg.style.opacity = "0";
+    }, duration);
+  }
+
+  // ---------- SUBJECTS PERSISTENCE ----------
+  function loadSubjectsFromStorage() {
+    const stored = localStorage.getItem(STORAGE_SUBJECTS);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          subjects = parsed;
+          return;
+        }
+      } catch(e) {}
+    }
+    // Default subjects if none exists
+    subjects = ["Mathematics", "Physics", "Chemistry", "Biology", "English Literature", "History"];
+  }
+
+  function saveSubjectsToStorage() {
+    localStorage.setItem(STORAGE_SUBJECTS, JSON.stringify(subjects));
+  }
+
+  // Reset to default subjects (keep current date attendance consistency)
+  function resetToDefaultSubjects() {
+    const defaultList = ["Mathematics", "Physics", "Chemistry", "Biology", "English Literature", "History"];
+    subjects = [...defaultList];
+    saveSubjectsToStorage();
+    // After resetting subjects, we must rebuild currentAttendance for current date with defaults (absent for new subjects, keep old if exists)
+    rebuildAttendanceForCurrentDate();
+    renderSubjectsGrid();
+    showToast("✅ Reset to default subjects", 1200);
+  }
+
+  // rebuild currentAttendance object based on current subjects and stored data for currentDate
+  function rebuildAttendanceForCurrentDate() {
+    const storedAttendance = loadAttendanceByDate(currentDate);
+    const newAttendance = {};
+    for (let sub of subjects) {
+      // if stored has value for this subject, keep it, else default 'absent'
+      newAttendance[sub] = (storedAttendance && storedAttendance[sub]) ? storedAttendance[sub] : "absent";
+    }
+    currentAttendance = newAttendance;
+    // persist after rebuild (to keep consistency)
+    saveAttendanceForCurrentDate();
+  }
+
+  // ---------- ATTENDANCE STORAGE (per date) ----------
+  function getStorageKeyForDate(dateStr) {
+    return ATTENDANCE_PREFIX + dateStr;
+  }
+
+  // Load attendance object for a specific date (returns object mapping subject->status)
+  function loadAttendanceByDate(dateStr) {
+    const key = getStorageKeyForDate(dateStr);
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch(e) {
+      return null;
+    }
+  }
+
+  // Save full attendance map for currentDate (global)
+  function saveAttendanceForCurrentDate() {
+    if (!currentDate) return;
+    const key = getStorageKeyForDate(currentDate);
+    // we only store entries for subjects that exist in current subjects list
+    const toStore = {};
+    for (let sub of subjects) {
+      if (currentAttendance.hasOwnProperty(sub)) {
+        toStore[sub] = currentAttendance[sub];
+      }
+    }
+    localStorage.setItem(key, JSON.stringify(toStore));
+    showToast(`📌 Saved for ${currentDate}`, 800);
+    updateStatsUI();   // update present count after save
+  }
+
+  // Load attendance for a given date and merge with current subjects list (ensures every subject has status)
+  function loadAndMergeAttendanceForDate(dateStr) {
+    const storedMap = loadAttendanceByDate(dateStr);
+    const merged = {};
+    for (let sub of subjects) {
+      if (storedMap && storedMap.hasOwnProperty(sub)) {
+        merged[sub] = storedMap[sub];
+      } else {
+        merged[sub] = "absent";   // default absent for missing subjects
+      }
+    }
+    return merged;
+  }
+
+  // Change date: reload everything and re-render
+  function setCurrentDate(newDate) {
+    if (!newDate) return;
+    currentDate = newDate;
+    dateInput.value = currentDate;
+    // Load attendance for this date (merged with subjects)
+    currentAttendance = loadAndMergeAttendanceForDate(currentDate);
+    // Ensure no missing subjects after potential subject list changes: double-check consistency
+    for (let sub of subjects) {
+      if (!currentAttendance.hasOwnProperty(sub)) currentAttendance[sub] = "absent";
+    }
+    renderSubjectsGrid();
+    // also update stats
+    updateStatsUI();
+  }
+
+  // update present/absent count from currentAttendance
+  function updateStatsUI() {
+    const total = subjects.length;
+    let presentCount = 0;
+    for (let sub of subjects) {
+      if (currentAttendance[sub] === "present") presentCount++;
+    }
+    statsDisplay.innerHTML = `✅ Present: ${presentCount} / ${total}  ${presentCount === total ? '🎉' : ''}`;
+  }
+
+  // render all subject cards with radio buttons based on currentAttendance
+  function renderSubjectsGrid() {
+    if (!subjectsContainer) return;
+    if (!subjects.length) {
+      subjectsContainer.innerHTML = `<div class="empty-message">📭 No subjects added. Use "Add Subject" to start tracking.</div>`;
+      updateStatsUI();
+      return;
+    }
+
+    let html = `<div class="subjects-grid">`;
+    for (let subject of subjects) {
+      const status = currentAttendance[subject] === "present" ? "present" : "absent";
+      // generate unique name for radio group based on subject (no spaces issue but fine)
+      const groupName = `att_group_${subject.replace(/\s/g, '_')}`;
+      html += `
+        <div class="subject-card" data-subject="${escapeHtml(subject)}">
+          <div class="subject-name">${escapeHtml(subject)}</div>
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="${groupName}" value="present" class="attendance-radio" data-subject="${escapeHtml(subject)}" ${status === "present" ? "checked" : ""}>
+              <span>✅ Present</span>
+            </label>
+            <label>
+              <input type="radio" name="${groupName}" value="absent" class="attendance-radio" data-subject="${escapeHtml(subject)}" ${status === "absent" ? "checked" : ""}>
+              <span>❌ Absent</span>
+            </label>
+          </div>
+          <button class="remove-subject" data-subject-remove="${escapeHtml(subject)}" title="Remove subject">🗑️</button>
+        </div>
+      `;
+    }
+    html += `</div>`;
+    subjectsContainer.innerHTML = html;
+    updateStatsUI();
+    attachRadioAndRemoveEvents();
+  }
+
+  // Helper to escape HTML to avoid XSS
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
+    });
+  }
+
+  // attach event listeners for radios and remove buttons (since dynamic)
+  function attachRadioAndRemoveEvents() {
+    // Radio change listener (delegation)
+    subjectsContainer.querySelectorAll('.attendance-radio').forEach(radio => {
+      radio.removeEventListener('change', handleRadioChange);
+      radio.addEventListener('change', handleRadioChange);
+    });
+    // Remove subject buttons
+    subjectsContainer.querySelectorAll('.remove-subject').forEach(btn => {
+      btn.removeEventListener('click', handleRemoveSubject);
+      btn.addEventListener('click', handleRemoveSubject);
+    });
+  }
+
+  function handleRadioChange(event) {
+    const radio = event.target;
+    if (!radio.classList.contains('attendance-radio')) return;
+    const subject = radio.getAttribute('data-subject');
+    if (!subject) return;
+    const newValue = radio.value; // "present" or "absent"
+    // update global currentAttendance
+    if (currentAttendance.hasOwnProperty(subject)) {
+      currentAttendance[subject] = newValue;
+    } else {
+      // edge case: subject might have been removed but still radio? no, but safe
+      currentAttendance[subject] = newValue;
+    }
+    // persist immediately
+    saveAttendanceForCurrentDate();
+    updateStatsUI();
+    // optional: update UI background highlight
+  }
+
+  function handleRemoveSubject(event) {
+    const btn = event.currentTarget;
+    const subjectToRemove = btn.getAttribute('data-subject-remove');
+    if (!subjectToRemove) return;
+    if (!confirm(`⚠️ Remove "${subjectToRemove}" from ALL dates? Attendance data for this subject will be deleted permanently.`)) return;
+    
+    // 1. remove from subjects array
+    const index = subjects.indexOf(subjectToRemove);
+    if (index !== -1) subjects.splice(index, 1);
+    saveSubjectsToStorage();
+    
+    // 2. remove subject from currentAttendance object
+    if (currentAttendance.hasOwnProperty(subjectToRemove)) {
+      delete currentAttendance[subjectToRemove];
+    }
+    
+    // 3. remove this subject from EVERY stored attendance record (full cleanup)
+    removeSubjectFromAllAttendanceRecords(subjectToRemove);
+    
+    // 4. re-save current date attendance after deletion
+    saveAttendanceForCurrentDate();
+    
+    // 5. re-render UI (currentAttendance already updated)
+    renderSubjectsGrid();
+    showToast(`🗑️ Removed "${subjectToRemove}" from all records`, 1400);
+  }
+
+  // Scans localStorage for all attendance_ keys and deletes the property matching subjectName
+  function removeSubjectFromAllAttendanceRecords(subjectName) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(ATTENDANCE_PREFIX)) {
+        const record = localStorage.getItem(key);
+        if (record) {
+          try {
+            const data = JSON.parse(record);
+            if (data && data.hasOwnProperty(subjectName)) {
+              delete data[subjectName];
+              localStorage.setItem(key, JSON.stringify(data));
+            }
+          } catch(e) {}
+        }
+      }
+    }
+  }
+
+  // Add new subject
+  function addNewSubject() {
+    const input = document.getElementById("newSubjectInput");
+    let newSub = input.value.trim();
+    if (!newSub) {
+      showToast("Please enter a subject name", 1000);
+      return;
+    }
+    // avoid duplicates (case insensitive)
+    const exists = subjects.some(s => s.toLowerCase() === newSub.toLowerCase());
+    if (exists) {
+      showToast(`⚠️ Subject "${newSub}" already exists`, 1200);
+      input.value = "";
+      return;
+    }
+    subjects.push(newSub);
+    saveSubjectsToStorage();
+    // Initialize attendance for this subject on CURRENT date as "absent"
+    currentAttendance[newSub] = "absent";
+    // Save current date attendance with the new subject
+    saveAttendanceForCurrentDate();
+    // re-render full grid
+    renderSubjectsGrid();
+    input.value = "";
+    showToast(`➕ Added "${newSub}" (default absent for ${currentDate})`, 1200);
+  }
+
+  // ----- Date navigation helpers -----
+  function shiftDate(deltaDays) {
+    if (!currentDate) return;
+    const newDateObj = new Date(currentDate + "T12:00:00");
+    newDateObj.setDate(newDateObj.getDate() + deltaDays);
+    const year = newDateObj.getFullYear();
+    const month = String(newDateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(newDateObj.getDate()).padStart(2, '0');
+    const newDateStr = `${year}-${month}-${day}`;
+    setCurrentDate(newDateStr);
+  }
+
+  function goToToday() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    setCurrentDate(`${yyyy}-${mm}-${dd}`);
+    showToast("📅 Jumped to today", 800);
+  }
+
+  // ---- Initialization & event binding ----
+  function init() {
+    loadSubjectsFromStorage();
+    saveSubjectsToStorage();  // ensure default stored
+    
+    // set current date to today
+    const todayObj = new Date();
+    const defaultDate = todayObj.toISOString().slice(0,10);
+    currentDate = defaultDate;
+    dateInput.value = currentDate;
+    
+    // load attendance for today, merged with subjects
+    currentAttendance = loadAndMergeAttendanceForDate(currentDate);
+    renderSubjectsGrid();
+    
+    // attach date picker event
+    dateInput.addEventListener("change", (e) => {
+      const newDate = e.target.value;
+      if (newDate) setCurrentDate(newDate);
+    });
+    
+    document.getElementById("prevDayBtn").addEventListener("click", () => shiftDate(-1));
+    document.getElementById("nextDayBtn").addEventListener("click", () => shiftDate(1));
+    document.getElementById("todayBtn").addEventListener("click", goToToday);
+    document.getElementById("addSubjectBtn").addEventListener("click", addNewSubject);
+    document.getElementById("resetDefaultSubjects").addEventListener("click", resetToDefaultSubjects);
+    
+    // optional: allow enter key on new subject input
+    document.getElementById("newSubjectInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") addNewSubject();
+    });
+  }
+  
+  // start everything
+  init();
+</script>
+</body>
+</html>
