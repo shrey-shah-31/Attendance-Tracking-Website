@@ -1,737 +1,716 @@
+Here is an interactive attendance tracker that combines a dashboard with subject cards, a calendar view for marking daily attendance, and full persistent storage—matching the design you requested.
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>FullStack Attendance Hub | Subjects & Date Tracker</title>
+  <title>Smart Attendance Hub | Subjects + Calendar Tracker</title>
+  <!-- Font Awesome 6 (free icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: system-ui, 'Segoe UI', 'Inter', 'Poppins', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
-      min-height: 100vh;
-      padding: 2rem 1.5rem;
+      background: #f4f7fc;
+      padding: 1.5rem;
     }
 
-    /* Main dashboard card */
-    .dashboard {
-      max-width: 1300px;
+    .app-container {
+      max-width: 1400px;
       margin: 0 auto;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(0px);
+    }
+
+    /* header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 1rem 2rem;
       border-radius: 2rem;
-      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
-      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 
-    /* Header area */
-    .hero {
-      background: #1a2a3f;
-      padding: 1.8rem 2rem;
-      color: white;
-      border-bottom: 3px solid #ffb347;
-    }
-
-    .hero h1 {
-      font-size: 1.9rem;
+    .title-section h1 {
+      font-size: 1.8rem;
       font-weight: 700;
-      letter-spacing: -0.3px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      background: linear-gradient(135deg, #1e2b3c, #2c4c6e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
-    .hero h1 span {
-      background: #ffb347;
-      padding: 0.3rem 1rem;
-      border-radius: 60px;
+    .title-section p {
+      color: #5b6e8c;
       font-size: 0.85rem;
-      font-weight: 500;
-      color: #1a2a3f;
     }
 
-    .subhead {
-      margin-top: 0.5rem;
-      opacity: 0.8;
-      font-weight: 400;
-      font-size: 0.95rem;
-    }
-
-    /* date + controls row */
-    .date-controls {
-      background: white;
-      padding: 1.2rem 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .date-picker-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #f8fafc;
-      padding: 0.4rem 1rem;
-      border-radius: 60px;
-      box-shadow: inset 0 1px 2px #0000, 0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .date-picker-group label {
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    input[type="date"] {
-      border: 1px solid #cbd5e1;
-      padding: 0.5rem 0.8rem;
-      border-radius: 40px;
-      font-weight: 500;
-      background: white;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .nav-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .nav-btn {
-      background: #eef2ff;
+    .add-btn {
+      background: #1e4668;
       border: none;
-      padding: 0.5rem 1.2rem;
+      padding: 0.6rem 1.4rem;
       border-radius: 40px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.85rem;
-      color: #1f3a5f;
-    }
-
-    .nav-btn:hover {
-      background: #cdd9ff;
-      transform: scale(0.96);
-    }
-
-    /* stats pill */
-    .stats-pill {
-      background: #1e293b;
       color: white;
-      border-radius: 60px;
-      padding: 0.4rem 1.3rem;
-      font-weight: 600;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* subjects container grid */
-    .subjects-section {
-      padding: 2rem;
-    }
-
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.8rem;
-      gap: 1rem;
-    }
-
-    .add-subject {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .add-subject input {
-      padding: 0.6rem 1rem;
-      border-radius: 60px;
-      border: 1px solid #cbd5e1;
-      background: white;
-      width: 200px;
-      outline: none;
-      transition: 0.2s;
-    }
-
-    .add-subject input:focus {
-      border-color: #ffb347;
-      box-shadow: 0 0 0 2px rgba(255, 180, 71, 0.2);
-    }
-
-    button {
-      background: #1a2a3f;
-      color: white;
-      border: none;
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
       font-weight: 600;
       cursor: pointer;
       transition: 0.2s;
-      font-size: 0.85rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    button.secondary {
-      background: #475569;
+    .add-btn:hover {
+      background: #0f2f4a;
+      transform: translateY(-2px);
     }
 
-    button.danger {
-      background: #b91c1c;
-    }
-
-    button.danger-light {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    button:hover {
-      filter: brightness(1.05);
-      transform: translateY(-1px);
-    }
-
-    /* subject cards grid */
+    /* subject grid */
     .subjects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.2rem;
-      margin-top: 0.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 1.6rem;
+      margin-top: 1rem;
     }
 
     .subject-card {
-      background: #ffffff;
-      border-radius: 1.5rem;
-      padding: 1rem 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+      background: white;
+      border-radius: 1.8rem;
+      padding: 1.2rem 1.2rem 1.2rem 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
       transition: all 0.2s;
-      border: 1px solid #eef2ff;
+      border: 1px solid #e9edf2;
+      position: relative;
     }
 
     .subject-card:hover {
-      border-color: #ffcd94;
-      box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+      border-color: #cbdde9;
+      box-shadow: 0 18px 28px -12px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .subject-name {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(145deg, #1a2c3f, #2b4c6e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
-    .subject-name::before {
-      content: "📘";
+    .category-badge {
+      background: #eef2ff;
+      padding: 0.2rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1e4668;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.8rem 0;
+      background: #f8fafd;
+      padding: 0.6rem 0.8rem;
+      border-radius: 1.2rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-weight: 800;
       font-size: 1.2rem;
+      color: #1f2f46;
     }
 
-    .radio-group {
+    .stat-label {
+      font-size: 0.7rem;
+      color: #5e6f8d;
+    }
+
+    .percentage-circle {
+      font-weight: 800;
+      font-size: 1.7rem;
+      color: #1e6f3f;
+    }
+
+    .req-info {
+      font-size: 0.8rem;
+      background: #fff6e5;
+      padding: 0.5rem 0.8rem;
+      border-radius: 1rem;
+      margin: 0.6rem 0;
       display: flex;
-      gap: 1.2rem;
+      justify-content: space-between;
       align-items: center;
-      background: #f1f5f9;
-      padding: 0.3rem 1rem;
-      border-radius: 60px;
     }
 
-    .radio-group label {
+    .req-text {
+      font-weight: 600;
+      color: #b45f06;
+    }
+
+    .card-actions {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      font-size: 0.9rem;
+      gap: 12px;
+      margin-top: 0.8rem;
+      justify-content: flex-end;
     }
 
-    .radio-group input {
-      accent-color: #ffb347;
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-
-    .remove-subject {
+    .icon-btn {
       background: none;
       border: none;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       cursor: pointer;
-      color: #94a3b8;
+      padding: 0.4rem;
+      border-radius: 60px;
       transition: 0.2s;
-      padding: 0.2rem 0.4rem;
-      border-radius: 30px;
+      color: #4a627a;
     }
 
-    .remove-subject:hover {
-      color: #dc2626;
-      background: #fee2e2;
+    .icon-btn:hover {
+      background: #eef2fa;
       transform: scale(1.05);
     }
 
-    .empty-message {
-      text-align: center;
-      padding: 3rem;
-      background: #fef9e6;
-      border-radius: 2rem;
-      color: #6b4e2e;
+    .delete-btn:hover {
+      color: #c7362b;
+      background: #ffe6e4;
     }
 
-    .toast-msg {
+    /* modals */
+    .modal {
+      display: none;
       position: fixed;
-      bottom: 25px;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-card {
+      background: white;
+      max-width: 550px;
+      width: 90%;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.2);
+    }
+
+    .modal-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid #cbd5e1;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .cal-day {
+      background: #f1f5f9;
+      padding: 0.6rem 0;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+
+    .cal-day.present {
+      background: #c8e6d9;
+      color: #0a5c2e;
+      font-weight: bold;
+    }
+
+    .cal-day.absent {
+      background: #ffe0db;
+      color: #b13e2d;
+    }
+
+    .cal-day.offday {
+      background: #e2e8f0;
+      color: #4a5568;
+      text-decoration: line-through;
+    }
+
+    .cal-day:hover {
+      transform: scale(0.96);
+      filter: brightness(0.96);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #1e293b;
+      background: #1f2f46;
       color: white;
-      padding: 0.6rem 1.5rem;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      z-index: 999;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+      padding: 0.5rem 1.2rem;
+      border-radius: 60px;
+      font-size: 0.8rem;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s;
       pointer-events: none;
+      z-index: 1100;
     }
 
     footer {
-      background: #f1f5f9;
+      margin-top: 2rem;
       text-align: center;
-      padding: 1rem;
-      font-size: 0.75rem;
-      color: #475569;
-      border-top: 1px solid #e2e8f0;
+      font-size: 0.7rem;
+      color: #7e8aa2;
     }
 
     @media (max-width: 700px) {
-      body {
-        padding: 1rem;
-      }
-      .subjects-grid {
-        grid-template-columns: 1fr;
-      }
-      .hero h1 {
-        font-size: 1.4rem;
-      }
+      body { padding: 1rem; }
+      .subject-name { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
-
-<div class="dashboard">
-  <div class="hero">
-    <h1>
-      📋 Attendance Flow 
-      <span>Full Stack • Past & Future</span>
-    </h1>
-    <div class="subhead">Mark present/absent for each subject • Any date (past/today/future) • Auto-saved locally</div>
+<div class="app-container">
+  <div class="top-bar">
+    <div class="title-section">
+      <h1><i class="fas fa-calendar-check"></i> Attendance Flow</h1>
+      <p>Mark present/absent on calendar • Track required % • Full history</p>
+    </div>
+    <button class="add-btn" id="openAddModalBtn"><i class="fas fa-plus"></i> New Subject</button>
   </div>
 
-  <div class="date-controls">
-    <div class="date-picker-group">
-      <label>📅 Select Date:</label>
-      <input type="date" id="attendanceDate" />
-    </div>
-    <div class="nav-buttons">
-      <button class="nav-btn" id="prevDayBtn">◀ Previous Day</button>
-      <button class="nav-btn" id="nextDayBtn">Next Day ▶</button>
-      <button class="nav-btn" id="todayBtn">📆 Today</button>
-    </div>
-    <div class="stats-pill" id="statsDisplay">
-      ✅ Present: 0 / 0
-    </div>
+  <div id="subjectsGrid" class="subjects-grid">
+    <!-- dynamic cards -->
   </div>
-
-  <div class="subjects-section">
-    <div class="toolbar">
-      <div class="add-subject">
-        <input type="text" id="newSubjectInput" placeholder="e.g., Art, Computer Science" autocomplete="off" />
-        <button id="addSubjectBtn">➕ Add Subject</button>
-        <button id="resetDefaultSubjects" class="secondary">⟳ Reset Default Subjects</button>
-      </div>
-      <small style="color:#475569;">⚡ changes auto-save for each date</small>
-    </div>
-
-    <div id="subjectsContainer">
-      <!-- dynamic subject cards injected here -->
-      <div class="empty-message">Loading subjects...</div>
-    </div>
-  </div>
-  <footer>
-    💾 Persistent storage (localStorage) • Mark attendance for any date (past & future) • Subjects are fully customizable
-  </footer>
+  <footer>📅 Tap on calendar icon to mark attendance per date • Data saved automatically</footer>
 </div>
-<div id="toastMsg" class="toast-msg">✔ Saved</div>
+
+<!-- Modal: Add / Edit Subject -->
+<div id="subjectModal" class="modal">
+  <div class="modal-card">
+    <h3 id="modalTitle">Add Subject</h3>
+    <input type="hidden" id="editSubjectId" value="">
+    <div class="form-group">
+      <label>Subject Name</label>
+      <input type="text" id="subjName" placeholder="e.g., CPDP, WP, TOC" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="subjCategory">
+        <option value="Theory">📘 Theory</option>
+        <option value="Lab">🔬 Lab</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Required Percentage (%)</label>
+      <input type="number" id="reqPercent" value="75" min="0" max="100" step="1">
+    </div>
+    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 1rem;">
+      <button id="closeModalBtn" class="icon-btn" style="background:#eef2fa; padding:0.5rem 1rem;">Cancel</button>
+      <button id="saveSubjectBtn" style="background:#1e4668; color:white; border:none; padding:0.5rem 1.4rem; border-radius:40px;">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Modal (per subject) -->
+<div id="calendarModal" class="modal">
+  <div class="modal-card" style="max-width: 600px;">
+    <div class="calendar-header">
+      <h3 id="calSubjectName">Subject Calendar</h3>
+      <button id="closeCalendarBtn" class="icon-btn"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <button id="prevMonthBtn" class="icon-btn"><i class="fas fa-chevron-left"></i> Prev</button>
+      <span id="monthYearDisplay" style="font-weight: bold;"></span>
+      <button id="nextMonthBtn" class="icon-btn">Next <i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="calendar-grid" id="calendarDaysGrid"></div>
+    <div style="margin-top: 1rem; font-size:0.75rem; background:#f8fafc; padding: 0.5rem; border-radius: 1rem;">
+      <span style="background:#c8e6d9; padding:0.2rem 0.6rem; border-radius:20px;">🟢 Present</span>
+      <span style="background:#ffe0db; padding:0.2rem 0.6rem; border-radius:20px;">🔴 Absent</span>
+      <span style="background:#e2e8f0; padding:0.2rem 0.6rem; border-radius:20px;">⚪ Off-day</span>
+      <span style="background:#f1f5f9; padding:0.2rem 0.6rem;">⬜ Not marked</span>
+      <span style="margin-left: 0.5rem;">👉 Tap date to cycle status</span>
+    </div>
+  </div>
+</div>
+
+<div id="toastMsg" class="toast">✓ Updated</div>
 
 <script>
-  // ---------- STORAGE KEYS ----------
-  const STORAGE_SUBJECTS = "attendance_app_subjects";
-  const ATTENDANCE_PREFIX = "attendance_";   // attendance_YYYY-MM-DD
+  // ---------- STORAGE ----------
+  const STORAGE_KEY = "attendance_smart_system";
+  
+  let subjects = []; // each: { id, name, category, requiredPercent, dateRecords: { "YYYY-MM-DD": "present"/"absent"/"offday" } }
 
-  // ---------- GLOBAL STATE ----------
-  let subjects = [];            // array of subject names (strings)
-  let currentDate = "";        // YYYY-MM-DD format
-  let currentAttendance = {};   // { "SubjectName": "present" or "absent" }
+  // Helper: generate unique id
+  function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 6); }
 
-  // DOM elements
-  const dateInput = document.getElementById("attendanceDate");
-  const subjectsContainer = document.getElementById("subjectsContainer");
-  const statsDisplay = document.getElementById("statsDisplay");
-  const toastMsg = document.getElementById("toastMsg");
-
-  // Helper: show temporary toast
-  function showToast(message, duration = 1500) {
-    toastMsg.textContent = message || "✓ Saved";
-    toastMsg.style.opacity = "1";
-    setTimeout(() => {
-      toastMsg.style.opacity = "0";
-    }, duration);
-  }
-
-  // ---------- SUBJECTS PERSISTENCE ----------
-  function loadSubjectsFromStorage() {
-    const stored = localStorage.getItem(STORAGE_SUBJECTS);
-    if (stored) {
+  // Load / Save
+  function loadData() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
       try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          subjects = parsed;
-          return;
-        }
-      } catch(e) {}
+        subjects = JSON.parse(raw);
+        if (!Array.isArray(subjects)) subjects = [];
+      } catch(e) { subjects = []; }
     }
-    // Default subjects if none exists
-    subjects = ["Mathematics", "Physics", "Chemistry", "Biology", "English Literature", "History"];
-  }
-
-  function saveSubjectsToStorage() {
-    localStorage.setItem(STORAGE_SUBJECTS, JSON.stringify(subjects));
-  }
-
-  // Reset to default subjects (keep current date attendance consistency)
-  function resetToDefaultSubjects() {
-    const defaultList = ["Mathematics", "Physics", "Chemistry", "Biology", "English Literature", "History"];
-    subjects = [...defaultList];
-    saveSubjectsToStorage();
-    // After resetting subjects, we must rebuild currentAttendance for current date with defaults (absent for new subjects, keep old if exists)
-    rebuildAttendanceForCurrentDate();
-    renderSubjectsGrid();
-    showToast("✅ Reset to default subjects", 1200);
-  }
-
-  // rebuild currentAttendance object based on current subjects and stored data for currentDate
-  function rebuildAttendanceForCurrentDate() {
-    const storedAttendance = loadAttendanceByDate(currentDate);
-    const newAttendance = {};
-    for (let sub of subjects) {
-      // if stored has value for this subject, keep it, else default 'absent'
-      newAttendance[sub] = (storedAttendance && storedAttendance[sub]) ? storedAttendance[sub] : "absent";
-    }
-    currentAttendance = newAttendance;
-    // persist after rebuild (to keep consistency)
-    saveAttendanceForCurrentDate();
-  }
-
-  // ---------- ATTENDANCE STORAGE (per date) ----------
-  function getStorageKeyForDate(dateStr) {
-    return ATTENDANCE_PREFIX + dateStr;
-  }
-
-  // Load attendance object for a specific date (returns object mapping subject->status)
-  function loadAttendanceByDate(dateStr) {
-    const key = getStorageKeyForDate(dateStr);
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw);
-    } catch(e) {
-      return null;
+    if (subjects.length === 0) {
+      // default subjects as per image: CPDP, WP, TOC, MIA, AJAVA
+      subjects = [
+        { id: generateId(), name: "CPDP", category: "Theory", requiredPercent: 75, dateRecords: {} },
+        { id: generateId(), name: "WP", category: "Theory", requiredPercent: 75, dateRecords: {} },
+        { id: generateId(), name: "TOC", category: "Theory", requiredPercent: 75, dateRecords: {} },
+        { id: generateId(), name: "MIA", category: "Theory", requiredPercent: 15, dateRecords: {} },
+        { id: generateId(), name: "AJAVA", category: "Lab", requiredPercent: 75, dateRecords: {} }
+      ];
+      saveData();
     }
   }
 
-  // Save full attendance map for currentDate (global)
-  function saveAttendanceForCurrentDate() {
-    if (!currentDate) return;
-    const key = getStorageKeyForDate(currentDate);
-    // we only store entries for subjects that exist in current subjects list
-    const toStore = {};
-    for (let sub of subjects) {
-      if (currentAttendance.hasOwnProperty(sub)) {
-        toStore[sub] = currentAttendance[sub];
-      }
-    }
-    localStorage.setItem(key, JSON.stringify(toStore));
-    showToast(`📌 Saved for ${currentDate}`, 800);
-    updateStatsUI();   // update present count after save
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(subjects));
   }
 
-  // Load attendance for a given date and merge with current subjects list (ensures every subject has status)
-  function loadAndMergeAttendanceForDate(dateStr) {
-    const storedMap = loadAttendanceByDate(dateStr);
-    const merged = {};
-    for (let sub of subjects) {
-      if (storedMap && storedMap.hasOwnProperty(sub)) {
-        merged[sub] = storedMap[sub];
-      } else {
-        merged[sub] = "absent";   // default absent for missing subjects
-      }
+  // compute attended & missed from dateRecords (only present/absent counts)
+  function computeStats(subject) {
+    let attended = 0, missed = 0;
+    const records = subject.dateRecords || {};
+    for (const status of Object.values(records)) {
+      if (status === 'present') attended++;
+      else if (status === 'absent') missed++;
     }
-    return merged;
+    const total = attended + missed;
+    const percentage = total === 0 ? 0 : (attended / total) * 100;
+    return { attended, missed, total, percentage };
   }
 
-  // Change date: reload everything and re-render
-  function setCurrentDate(newDate) {
-    if (!newDate) return;
-    currentDate = newDate;
-    dateInput.value = currentDate;
-    // Load attendance for this date (merged with subjects)
-    currentAttendance = loadAndMergeAttendanceForDate(currentDate);
-    // Ensure no missing subjects after potential subject list changes: double-check consistency
-    for (let sub of subjects) {
-      if (!currentAttendance.hasOwnProperty(sub)) currentAttendance[sub] = "absent";
+  // "Can miss X more classes" or need more attendance
+  function getAdvice(subject, attended, missed, requiredPercent) {
+    const total = attended + missed;
+    if (total === 0) return `Need ${Math.ceil(requiredPercent/100 * 1)} class(es) to start`;
+    const currentPercent = (attended / total) * 100;
+    if (currentPercent >= requiredPercent) {
+      // can miss some classes while staying above required?
+      // max missed = floor( (attended * 100 / requiredPercent) - total )
+      const maxTotal = (attended * 100) / requiredPercent;
+      const allowedMissed = Math.floor(maxTotal - total);
+      if (allowedMissed <= 0) return "⚠️ At threshold, don't miss any";
+      return `✨ Can miss ${allowedMissed} more class(es)`;
+    } else {
+      // need extra attendance
+      const neededAttendance = Math.ceil((requiredPercent * total - 100 * attended) / (100 - requiredPercent));
+      if (neededAttendance <= 0) return "✔️ On track";
+      return `📈 Need ${neededAttendance} consecutive present(s)`;
     }
-    renderSubjectsGrid();
-    // also update stats
-    updateStatsUI();
   }
 
-  // update present/absent count from currentAttendance
-  function updateStatsUI() {
-    const total = subjects.length;
-    let presentCount = 0;
-    for (let sub of subjects) {
-      if (currentAttendance[sub] === "present") presentCount++;
-    }
-    statsDisplay.innerHTML = `✅ Present: ${presentCount} / ${total}  ${presentCount === total ? '🎉' : ''}`;
-  }
-
-  // render all subject cards with radio buttons based on currentAttendance
-  function renderSubjectsGrid() {
-    if (!subjectsContainer) return;
-    if (!subjects.length) {
-      subjectsContainer.innerHTML = `<div class="empty-message">📭 No subjects added. Use "Add Subject" to start tracking.</div>`;
-      updateStatsUI();
+  // render dashboard
+  function renderDashboard() {
+    const container = document.getElementById("subjectsGrid");
+    if (!container) return;
+    if (subjects.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;">➕ Click 'New Subject' to start</div>`;
       return;
     }
-
-    let html = `<div class="subjects-grid">`;
-    for (let subject of subjects) {
-      const status = currentAttendance[subject] === "present" ? "present" : "absent";
-      // generate unique name for radio group based on subject (no spaces issue but fine)
-      const groupName = `att_group_${subject.replace(/\s/g, '_')}`;
+    let html = "";
+    subjects.forEach(sub => {
+      const { attended, missed, percentage } = computeStats(sub);
+      const req = sub.requiredPercent;
+      const advice = getAdvice(sub, attended, missed, req);
+      const percentDisplay = percentage.toFixed(1);
+      let percentColor = "#1e6f3f";
+      if (percentage < req) percentColor = "#c2410c";
+      else if (percentage >= req) percentColor = "#2b6e3c";
       html += `
-        <div class="subject-card" data-subject="${escapeHtml(subject)}">
-          <div class="subject-name">${escapeHtml(subject)}</div>
-          <div class="radio-group">
-            <label>
-              <input type="radio" name="${groupName}" value="present" class="attendance-radio" data-subject="${escapeHtml(subject)}" ${status === "present" ? "checked" : ""}>
-              <span>✅ Present</span>
-            </label>
-            <label>
-              <input type="radio" name="${groupName}" value="absent" class="attendance-radio" data-subject="${escapeHtml(subject)}" ${status === "absent" ? "checked" : ""}>
-              <span>❌ Absent</span>
-            </label>
+        <div class="subject-card" data-id="${sub.id}">
+          <div class="card-header">
+            <span class="subject-name">${escapeHtml(sub.name)}</span>
+            <span class="category-badge"><i class="fas ${sub.category === 'Lab' ? 'fa-flask' : 'fa-book'}"></i> ${escapeHtml(sub.category)}</span>
           </div>
-          <button class="remove-subject" data-subject-remove="${escapeHtml(subject)}" title="Remove subject">🗑️</button>
+          <div class="stats-row">
+            <div class="stat"><div class="stat-value">${attended}</div><div class="stat-label">Attended</div></div>
+            <div class="stat"><div class="stat-value">${missed}</div><div class="stat-label">Missed</div></div>
+            <div class="stat"><div class="percentage-circle" style="color:${percentColor}">${percentDisplay}%</div><div class="stat-label">Current</div></div>
+          </div>
+          <div class="req-info">
+            <span><i class="fas fa-chart-line"></i> Required: ${req}%</span>
+            <span class="req-text">${advice}</span>
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn calendar-action" data-id="${sub.id}" title="Mark attendance calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
+            <button class="icon-btn edit-subject" data-id="${sub.id}" title="Edit subject"><i class="fas fa-edit"></i></button>
+            <button class="icon-btn delete-btn" data-id="${sub.id}" title="Delete subject"><i class="fas fa-trash-alt"></i></button>
+          </div>
         </div>
       `;
-    }
-    html += `</div>`;
-    subjectsContainer.innerHTML = html;
-    updateStatsUI();
-    attachRadioAndRemoveEvents();
-  }
-
-  // Helper to escape HTML to avoid XSS
-  function escapeHtml(str) {
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-      return c;
     });
-  }
-
-  // attach event listeners for radios and remove buttons (since dynamic)
-  function attachRadioAndRemoveEvents() {
-    // Radio change listener (delegation)
-    subjectsContainer.querySelectorAll('.attendance-radio').forEach(radio => {
-      radio.removeEventListener('change', handleRadioChange);
-      radio.addEventListener('change', handleRadioChange);
+    container.innerHTML = html;
+    // attach events
+    document.querySelectorAll('.calendar-action').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        openCalendarForSubject(id);
+      });
     });
-    // Remove subject buttons
-    subjectsContainer.querySelectorAll('.remove-subject').forEach(btn => {
-      btn.removeEventListener('click', handleRemoveSubject);
-      btn.addEventListener('click', handleRemoveSubject);
+    document.querySelectorAll('.edit-subject').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        openEditModal(id);
+      });
     });
-  }
-
-  function handleRadioChange(event) {
-    const radio = event.target;
-    if (!radio.classList.contains('attendance-radio')) return;
-    const subject = radio.getAttribute('data-subject');
-    if (!subject) return;
-    const newValue = radio.value; // "present" or "absent"
-    // update global currentAttendance
-    if (currentAttendance.hasOwnProperty(subject)) {
-      currentAttendance[subject] = newValue;
-    } else {
-      // edge case: subject might have been removed but still radio? no, but safe
-      currentAttendance[subject] = newValue;
-    }
-    // persist immediately
-    saveAttendanceForCurrentDate();
-    updateStatsUI();
-    // optional: update UI background highlight
-  }
-
-  function handleRemoveSubject(event) {
-    const btn = event.currentTarget;
-    const subjectToRemove = btn.getAttribute('data-subject-remove');
-    if (!subjectToRemove) return;
-    if (!confirm(`⚠️ Remove "${subjectToRemove}" from ALL dates? Attendance data for this subject will be deleted permanently.`)) return;
-    
-    // 1. remove from subjects array
-    const index = subjects.indexOf(subjectToRemove);
-    if (index !== -1) subjects.splice(index, 1);
-    saveSubjectsToStorage();
-    
-    // 2. remove subject from currentAttendance object
-    if (currentAttendance.hasOwnProperty(subjectToRemove)) {
-      delete currentAttendance[subjectToRemove];
-    }
-    
-    // 3. remove this subject from EVERY stored attendance record (full cleanup)
-    removeSubjectFromAllAttendanceRecords(subjectToRemove);
-    
-    // 4. re-save current date attendance after deletion
-    saveAttendanceForCurrentDate();
-    
-    // 5. re-render UI (currentAttendance already updated)
-    renderSubjectsGrid();
-    showToast(`🗑️ Removed "${subjectToRemove}" from all records`, 1400);
-  }
-
-  // Scans localStorage for all attendance_ keys and deletes the property matching subjectName
-  function removeSubjectFromAllAttendanceRecords(subjectName) {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(ATTENDANCE_PREFIX)) {
-        const record = localStorage.getItem(key);
-        if (record) {
-          try {
-            const data = JSON.parse(record);
-            if (data && data.hasOwnProperty(subjectName)) {
-              delete data[subjectName];
-              localStorage.setItem(key, JSON.stringify(data));
-            }
-          } catch(e) {}
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        if (confirm("Delete subject and ALL attendance records?")) {
+          subjects = subjects.filter(s => s.id !== id);
+          saveData();
+          renderDashboard();
+          showToast(`🗑️ Subject removed`);
         }
+      });
+    });
+  }
+
+  function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+  // ---------- Calendar logic (per subject) ----------
+  let currentCalendarSubject = null;
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth(); // 0-11
+
+  function openCalendarForSubject(subjectId) {
+    const subject = subjects.find(s => s.id === subjectId);
+    if (!subject) return;
+    currentCalendarSubject = subject;
+    document.getElementById("calSubjectName").innerHTML = `<i class="fas fa-calendar-week"></i> ${escapeHtml(subject.name)} · Attendance`;
+    // reset to today's year/month
+    const today = new Date();
+    currentYear = today.getFullYear();
+    currentMonth = today.getMonth();
+    renderCalendarGrid();
+    document.getElementById("calendarModal").style.display = "flex";
+  }
+
+  function renderCalendarGrid() {
+    if (!currentCalendarSubject) return;
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const startWeekday = firstDay.getDay(); // 0 sun
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    document.getElementById("monthYearDisplay").innerText = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    let gridHtml = "";
+    // empty cells for offset
+    for (let i = 0; i < startWeekday; i++) {
+      gridHtml += `<div class="cal-day" style="background:transparent; box-shadow:none;"></div>`;
+    }
+    const records = currentCalendarSubject.dateRecords || {};
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      let status = records[dateStr] || null;
+      let statusClass = "";
+      let statusText = d;
+      if (status === 'present') statusClass = "present";
+      else if (status === 'absent') statusClass = "absent";
+      else if (status === 'offday') statusClass = "offday";
+      gridHtml += `<div class="cal-day ${statusClass}" data-date="${dateStr}" data-status="${status || ''}">${d}</div>`;
+    }
+    const grid = document.getElementById("calendarDaysGrid");
+    grid.innerHTML = gridHtml;
+    // attach click events to each day
+    grid.querySelectorAll('.cal-day').forEach(dayDiv => {
+      const date = dayDiv.getAttribute('data-date');
+      if (!date) return;
+      dayDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cycleAttendanceStatus(date);
+      });
+    });
+  }
+
+  function cycleAttendanceStatus(dateStr) {
+    if (!currentCalendarSubject) return;
+    if (!currentCalendarSubject.dateRecords) currentCalendarSubject.dateRecords = {};
+    const currentStatus = currentCalendarSubject.dateRecords[dateStr] || null;
+    let newStatus = null;
+    if (currentStatus === null) newStatus = 'present';
+    else if (currentStatus === 'present') newStatus = 'absent';
+    else if (currentStatus === 'absent') newStatus = 'offday';
+    else if (currentStatus === 'offday') newStatus = null;
+    
+    if (newStatus === null) {
+      delete currentCalendarSubject.dateRecords[dateStr];
+    } else {
+      currentCalendarSubject.dateRecords[dateStr] = newStatus;
+    }
+    // update storage and re-render both calendar and dashboard
+    saveData();
+    renderCalendarGrid();      // refresh calendar UI
+    renderDashboard();         // update stats on main page
+    showToast(`📅 ${dateStr}: ${newStatus ? newStatus.toUpperCase() : 'Cleared'}`);
+  }
+
+  // ---------- Subject Add / Edit Modal ----------
+  let modalMode = "add"; // add or edit
+  function openEditModal(subjectId) {
+    const sub = subjects.find(s => s.id === subjectId);
+    if (!sub) return;
+    document.getElementById("editSubjectId").value = sub.id;
+    document.getElementById("subjName").value = sub.name;
+    document.getElementById("subjCategory").value = sub.category;
+    document.getElementById("reqPercent").value = sub.requiredPercent;
+    document.getElementById("modalTitle").innerText = "Edit Subject";
+    modalMode = "edit";
+    document.getElementById("subjectModal").style.display = "flex";
+  }
+
+  function openAddModal() {
+    document.getElementById("editSubjectId").value = "";
+    document.getElementById("subjName").value = "";
+    document.getElementById("subjCategory").value = "Theory";
+    document.getElementById("reqPercent").value = "75";
+    document.getElementById("modalTitle").innerText = "Add Subject";
+    modalMode = "add";
+    document.getElementById("subjectModal").style.display = "flex";
+  }
+
+  function saveSubjectFromModal() {
+    const name = document.getElementById("subjName").value.trim();
+    if (!name) { showToast("Subject name required"); return; }
+    const category = document.getElementById("subjCategory").value;
+    let reqPercent = parseInt(document.getElementById("reqPercent").value, 10);
+    if (isNaN(reqPercent)) reqPercent = 75;
+    reqPercent = Math.min(100, Math.max(0, reqPercent));
+    
+    if (modalMode === "add") {
+      // avoid duplicate names (case insensitive)
+      if (subjects.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+        showToast("Subject already exists!");
+        return;
+      }
+      const newSubject = {
+        id: generateId(),
+        name: name,
+        category: category,
+        requiredPercent: reqPercent,
+        dateRecords: {}
+      };
+      subjects.push(newSubject);
+      showToast(`➕ Added ${name}`);
+    } else {
+      const editId = document.getElementById("editSubjectId").value;
+      const idx = subjects.findIndex(s => s.id === editId);
+      if (idx !== -1) {
+        // avoid duplicate name conflict with other subjects
+        if (subjects.some((s, i) => i !== idx && s.name.toLowerCase() === name.toLowerCase())) {
+          showToast("Another subject with same name exists!");
+          return;
+        }
+        subjects[idx].name = name;
+        subjects[idx].category = category;
+        subjects[idx].requiredPercent = reqPercent;
+        showToast(`✏️ Updated ${name}`);
       }
     }
+    saveData();
+    renderDashboard();
+    document.getElementById("subjectModal").style.display = "none";
   }
 
-  // Add new subject
-  function addNewSubject() {
-    const input = document.getElementById("newSubjectInput");
-    let newSub = input.value.trim();
-    if (!newSub) {
-      showToast("Please enter a subject name", 1000);
-      return;
-    }
-    // avoid duplicates (case insensitive)
-    const exists = subjects.some(s => s.toLowerCase() === newSub.toLowerCase());
-    if (exists) {
-      showToast(`⚠️ Subject "${newSub}" already exists`, 1200);
-      input.value = "";
-      return;
-    }
-    subjects.push(newSub);
-    saveSubjectsToStorage();
-    // Initialize attendance for this subject on CURRENT date as "absent"
-    currentAttendance[newSub] = "absent";
-    // Save current date attendance with the new subject
-    saveAttendanceForCurrentDate();
-    // re-render full grid
-    renderSubjectsGrid();
-    input.value = "";
-    showToast(`➕ Added "${newSub}" (default absent for ${currentDate})`, 1200);
+  // helper toast
+  function showToast(msg) {
+    const toast = document.getElementById("toastMsg");
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    setTimeout(() => { toast.style.opacity = "0"; }, 1500);
   }
 
-  // ----- Date navigation helpers -----
-  function shiftDate(deltaDays) {
-    if (!currentDate) return;
-    const newDateObj = new Date(currentDate + "T12:00:00");
-    newDateObj.setDate(newDateObj.getDate() + deltaDays);
-    const year = newDateObj.getFullYear();
-    const month = String(newDateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(newDateObj.getDate()).padStart(2, '0');
-    const newDateStr = `${year}-${month}-${day}`;
-    setCurrentDate(newDateStr);
+  // Month navigation for calendar modal
+  function prevMonth() {
+    if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+    else currentMonth--;
+    renderCalendarGrid();
+  }
+  function nextMonth() {
+    if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+    else currentMonth++;
+    renderCalendarGrid();
   }
 
-  function goToToday() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    setCurrentDate(`${yyyy}-${mm}-${dd}`);
-    showToast("📅 Jumped to today", 800);
-  }
-
-  // ---- Initialization & event binding ----
-  function init() {
-    loadSubjectsFromStorage();
-    saveSubjectsToStorage();  // ensure default stored
-    
-    // set current date to today
-    const todayObj = new Date();
-    const defaultDate = todayObj.toISOString().slice(0,10);
-    currentDate = defaultDate;
-    dateInput.value = currentDate;
-    
-    // load attendance for today, merged with subjects
-    currentAttendance = loadAndMergeAttendanceForDate(currentDate);
-    renderSubjectsGrid();
-    
-    // attach date picker event
-    dateInput.addEventListener("change", (e) => {
-      const newDate = e.target.value;
-      if (newDate) setCurrentDate(newDate);
+  // Event listeners & init
+  document.addEventListener("DOMContentLoaded", () => {
+    loadData();
+    renderDashboard();
+    // modal controls
+    document.getElementById("openAddModalBtn").addEventListener("click", openAddModal);
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("subjectModal").style.display = "none";
     });
-    
-    document.getElementById("prevDayBtn").addEventListener("click", () => shiftDate(-1));
-    document.getElementById("nextDayBtn").addEventListener("click", () => shiftDate(1));
-    document.getElementById("todayBtn").addEventListener("click", goToToday);
-    document.getElementById("addSubjectBtn").addEventListener("click", addNewSubject);
-    document.getElementById("resetDefaultSubjects").addEventListener("click", resetToDefaultSubjects);
-    
-    // optional: allow enter key on new subject input
-    document.getElementById("newSubjectInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") addNewSubject();
+    document.getElementById("saveSubjectBtn").addEventListener("click", saveSubjectFromModal);
+    document.getElementById("closeCalendarBtn").addEventListener("click", () => {
+      document.getElementById("calendarModal").style.display = "none";
+      currentCalendarSubject = null;
     });
-  }
-  
-  // start everything
-  init();
+    document.getElementById("prevMonthBtn").addEventListener("click", prevMonth);
+    document.getElementById("nextMonthBtn").addEventListener("click", nextMonth);
+    window.addEventListener("click", (e) => {
+      const modal = document.getElementById("calendarModal");
+      if (e.target === modal) modal.style.display = "none";
+      const subjectModal = document.getElementById("subjectModal");
+      if (e.target === subjectModal) subjectModal.style.display = "none";
+    });
+  });
 </script>
 </body>
 </html>
+```
