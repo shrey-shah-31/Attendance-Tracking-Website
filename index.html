@@ -1,580 +1,713 @@
-Here's a significantly enhanced version of the Smart Attendance Hub with advanced features, improved UI/UX, data analytics, export capabilities, and much more:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>🚀 Advanced Attendance Hub | AI-Powered Analytics</title>
-  <!-- Font Awesome 6 + Google Fonts -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Chart.js for analytics -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Smart Attendance Hub | Subjects + Calendar Tracker</title>
+  <!-- Font Awesome 6 (free icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    :root {
-      --primary: #1e3a8a;
-      --primary-dark: #1e1b4b;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
-      --text-primary: #0f172a;
-      --text-secondary: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-      --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.25);
-    }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, var(--bg-primary) 0%, #e2e8f0 100%);
-      min-height: 100vh;
+      background: #f4f7fc;
       padding: 1.5rem;
-      color: var(--text-primary);
     }
 
     .app-container {
-      max-width: 1600px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
-    /* Enhanced Header */
+    /* header */
     .top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
       flex-wrap: wrap;
-      gap: 1.5rem;
-      margin-bottom: 2.5rem;
-      background: var(--bg-secondary);
-      padding: 1.5rem 2.5rem;
-      border-radius: 2.5rem;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .top-bar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--success), var(--warning));
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 
     .title-section h1 {
-      font-size: 2.2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e2b3c, #2c4c6e);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
     }
 
-    .overall-stats {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+    .title-section p {
+      color: #5b6e8c;
+      font-size: 0.85rem;
     }
 
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      min-width: 100px;
-      box-shadow: var(--shadow);
-      transition: transform 0.2s;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-3px);
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
-
-    /* Action Buttons */
-    .action-buttons {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
+    .add-btn {
+      background: #1e4668;
       border: none;
-      border-radius: 50px;
+      padding: 0.6rem 1.4rem;
+      border-radius: 40px;
+      color: white;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.9rem;
-      text-decoration: none;
-      box-shadow: var(--shadow);
+      transition: 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
-      color: white;
-    }
-
-    .btn-primary:hover {
+    .add-btn:hover {
+      background: #0f2f4a;
       transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
     }
 
-    .btn-secondary {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      border: 2px solid var(--border);
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, var(--success), #34d399);
-      color: white;
-    }
-
-    .btn-danger {
-      background: linear-gradient(135deg, var(--danger), #f87171);
-      color: white;
-    }
-
-    /* Enhanced Subject Grid */
+    /* subject grid */
     .subjects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 2rem;
-      margin-bottom: 3rem;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 1.6rem;
+      margin-top: 1rem;
     }
 
     .subject-card {
-      background: var(--bg-secondary);
-      border-radius: 2rem;
-      padding: 2rem;
-      box-shadow: var(--shadow);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid var(--border);
+      background: white;
+      border-radius: 1.8rem;
+      padding: 1.2rem 1.2rem 1.2rem 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      border: 1px solid #e9edf2;
       position: relative;
-      overflow: hidden;
-    }
-
-    .subject-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--success));
-      opacity: 0.7;
     }
 
     .subject-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--primary);
+      transform: translateY(-3px);
+      border-color: #cbdde9;
+      box-shadow: 0 18px 28px -12px rgba(0,0,0,0.15);
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
-      position: relative;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .subject-name {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      letter-spacing: -0.3px;
+      background: linear-gradient(145deg, #1a2c3f, #2b4c6e);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      line-height: 1.2;
     }
 
-    .status-badge {
-      padding: 0.5rem 1rem;
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .category-badge {
+      background: #eef2ff;
+      padding: 0.2rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1e4668;
     }
 
-    .status-safe { background: linear-gradient(135deg, var(--success), #34d399); color: white; }
-    .status-warning { background: linear-gradient(135deg, var(--warning), #fbbf24); color: white; }
-    .status-danger { background: linear-gradient(135deg, var(--danger), #f87171); color: white; }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
-      margin: 1.5rem 0;
-      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-      padding: 1.5rem;
-      border-radius: 1.5rem;
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.8rem 0;
+      background: #f8fafd;
+      padding: 0.6rem 0.8rem;
+      border-radius: 1.2rem;
     }
 
-    .stat-item {
+    .stat {
       text-align: center;
     }
 
-    .stat-number {
-      font-size: 2rem;
+    .stat-value {
       font-weight: 800;
-      line-height: 1;
-      margin-bottom: 0.25rem;
+      font-size: 1.2rem;
+      color: #1f2f46;
     }
 
-    .stat-attended { color: var(--success); }
-    .stat-missed { color: var(--danger); }
-    .stat-percent { 
-      background: linear-gradient(135deg, var(--success), var(--warning));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+    .stat-label {
+      font-size: 0.7rem;
+      color: #5e6f8d;
     }
 
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 1rem 0;
+    .percentage-circle {
+      font-weight: 800;
+      font-size: 1.7rem;
+      color: #1e6f3f;
     }
 
-    .progress-fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
-
-    .progress-safe { background: linear-gradient(135deg, var(--success), #34d399); }
-    .progress-warning { background: linear-gradient(135deg, var(--warning), #fbbf24); }
-    .progress-danger { background: linear-gradient(135deg, var(--danger), #f87171); }
-
-    .prediction {
-      background: linear-gradient(135deg, #fef3c7, #fde68a);
-      padding: 1rem;
-      border-radius: 1.2rem;
-      border-left: 4px solid var(--warning);
-      margin: 1.5rem 0;
-      font-weight: 600;
+    .req-info {
+      font-size: 0.8rem;
+      background: #fff6e5;
+      padding: 0.5rem 0.8rem;
+      border-radius: 1rem;
+      margin: 0.6rem 0;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
+    }
+
+    .req-text {
+      font-weight: 600;
+      color: #b45f06;
     }
 
     .card-actions {
       display: flex;
-      gap: 1rem;
+      gap: 12px;
+      margin-top: 0.8rem;
       justify-content: flex-end;
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
     }
 
     .icon-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      background: none;
       border: none;
-      background: #f1f5f9;
-      color: var(--text-secondary);
+      font-size: 1.2rem;
       cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
+      padding: 0.4rem;
+      border-radius: 60px;
+      transition: 0.2s;
+      color: #4a627a;
     }
 
     .icon-btn:hover {
-      background: var(--primary);
-      color: white;
-      transform: translateY(-2px);
+      background: #eef2fa;
+      transform: scale(1.05);
     }
 
-    /* Analytics Section */
-    .analytics-section {
-      background: var(--bg-secondary);
-      border-radius: 2rem;
-      padding: 2.5rem;
-      margin-bottom: 3rem;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
+    .delete-btn:hover {
+      color: #c7362b;
+      background: #ffe6e4;
     }
 
-    .analytics-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .chart-container {
-      position: relative;
-      height: 400px;
-      margin-top: 2rem;
-    }
-
-    /* Enhanced Modals */
+    /* modals */
     .modal {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(8px);
-      z-index: 10000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
       justify-content: center;
       align-items: center;
-      padding: 2rem;
+      z-index: 1000;
     }
 
     .modal-card {
-      background: var(--bg-secondary);
-      max-width: 650px;
-      width: 95%;
-      max-height: 90vh;
-      border-radius: 2.5rem;
-      padding: 2.5rem;
-      box-shadow: var(--shadow-lg);
+      background: white;
+      max-width: 550px;
+      width: 90%;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      max-height: 85vh;
       overflow-y: auto;
-      position: relative;
-      animation: modalSlideIn 0.3s ease;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.2);
     }
 
-    @keyframes modalSlideIn {
-      from { opacity: 0; transform: translateY(-50px) scale(0.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+    .modal-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
     }
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid var(--border);
+    .form-group {
+      margin-bottom: 1rem;
     }
 
-    .modal-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--text-primary);
+    .form-group label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.3rem;
     }
 
-    /* Calendar Enhancements */
-    .calendar-container {
-      max-height: 500px;
-      overflow-y: auto;
+    input, select {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid #cbd5e1;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .cal-day {
+      background: #f1f5f9;
+      padding: 0.6rem 0;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+
+    .cal-day.present {
+      background: #c8e6d9;
+      color: #0a5c2e;
+      font-weight: bold;
+    }
+
+    .cal-day.absent {
+      background: #ffe0db;
+      color: #b13e2d;
+    }
+
+    .cal-day.offday {
+      background: #e2e8f0;
+      color: #4a5568;
+      text-decoration: line-through;
+    }
+
+    .cal-day:hover {
+      transform: scale(0.96);
+      filter: brightness(0.96);
     }
 
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid var(--border);
+      margin-bottom: 1rem;
     }
 
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      text-align: center;
-    }
-
-    .cal-day-header {
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
-      color: white;
-      padding: 1rem 0.5rem;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    .cal-day {
-      aspect-ratio: 1;
-      background: #f8fafc;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 2px solid transparent;
-      position: relative;
-    }
-
-    .cal-day:hover {
-      transform: scale(1.1);
-      box-shadow: var(--shadow);
-      z-index: 10;
-    }
-
-    .cal-day.present {
-      background: linear-gradient(135deg, var(--success), #34d399);
-      color: white;
-      border-color: #059669;
-    }
-
-    .cal-day.absent {
-      background: linear-gradient(135deg, var(--danger), #f87171);
-      color: white;
-      border-color: #dc2626;
-    }
-
-    .cal-day.offday {
-      background: linear-gradient(135deg, #6b7280, #9ca3af);
-      color: white;
-      border-color: #4b5563;
-      text-decoration: line-through;
-    }
-
-    .cal-day.today {
-      border-color: var(--warning);
-      background: linear-gradient(135deg, var(--warning), #fbbf24);
-      color: white;
-      font-weight: 800;
-      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
-    }
-
-    /* Legend */
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 1.5rem;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-      border-radius: 1.5rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .legend-color {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-    }
-
-    /* Toast & Notifications */
     .toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      background: #1f2f46;
       color: white;
-      padding: 1rem 2rem;
-      border-radius: 50px;
-      font-weight: 600;
+      padding: 0.5rem 1.2rem;
+      border-radius: 60px;
+      font-size: 0.8rem;
       opacity: 0;
-      transition: all 0.3s;
-      box-shadow: var(--shadow-lg);
-      z-index: 20000;
-      max-width: 400px;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 1100;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(-10px);
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #7e8aa2;
     }
 
-    /* Export Modal */
-    .export-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
+    @media (max-width: 700px) {
       body { padding: 1rem; }
-      .subjects-grid { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-      .top-bar { flex-direction: column; text-align: center; gap: 1rem; }
-      .chart-container { height: 300px; }
-    }
-
-    /* Loading Animation */
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+      .subject-name { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
 <div class="app-container">
-  <!-- Enhanced Header -->
   <div class="top-bar">
     <div class="title-section">
-      <h1><i class="fas fa-graduation-cap"></i> Advanced Attendance Hub</h1>
-      <p>AI-Powered Analytics • Smart Predictions • Complete Tracking</p>
+      <h1><i class="fas fa-calendar-check"></i> Attendance Flow</h1>
+      <p>Mark present/absent on calendar • Track required % • Full history</p>
     </div>
-    <div class="overall-stats" id="overallStats">
-      <!-- Dynamic stats -->
+    <button class="add-btn" id="openAddModalBtn"><i class="fas fa-plus"></i> New Subject</button>
+  </div>
+
+  <div id="subjectsGrid" class="subjects-grid">
+    <!-- dynamic cards -->
+  </div>
+  <footer>📅 Tap on calendar icon to mark attendance per date • Data saved automatically</footer>
+</div>
+
+<!-- Modal: Add / Edit Subject -->
+<div id="subjectModal" class="modal">
+  <div class="modal-card">
+    <h3 id="modalTitle">Add Subject</h3>
+    <input type="hidden" id="editSubjectId" value="">
+    <div class="form-group">
+      <label>Subject Name</label>
+      <input type="text" id="subjName" placeholder="e.g., CPDP, WP, TOC" autocomplete="off">
     </div>
-    <div class="action-buttons">
-      <button class="btn btn-primary" id="openAddModalBtn">
-        <i class="fas fa-plus"></i> New Subject
-      </button>
-      <button class="btn btn-secondary" id="exportBtn" title="Export Data">
-        <i class="fas fa-download"></i> Export
-      </button>
-      <button class="btn btn-success" id="analyticsToggle">
-        <i class="fas fa-chart-line"></i> Analytics
+    <div class="form-group">
+      <label>Category</label>
+      <select id="subjCategory">
+        <option value="Theory">📘 Theory</option>
+        <option value="Lab">🔬 Lab</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Required Percentage (%)</label>
+      <input type="number" id="reqPercent" value="75" min="0" max="100" step="1">
+    </div>
+    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 1rem;">
+      <button id="closeModalBtn" class="icon-btn" style="background:#eef2fa; padding:0.5rem 1rem;">Cancel</button>
+      <button id="saveSubjectBtn" style="background:#1e4668; color:white; border:none; padding:0.5rem 1.4rem; border-radius:40px;">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Modal (per subject) -->
+<div id="calendarModal" class="modal">
+  <div class="modal-card" style="max-width: 600px;">
+    <div class="calendar-header">
+      <h3 id="calSubjectName">Subject Calendar</h3>
+      <button id="closeCalendarBtn" class="icon-btn"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <button id="prevMonthBtn" class="icon-btn"><i class="fas fa-chevron-left"></i> Prev</button>
+      <span id="monthYearDisplay" style="font-weight: bold;"></span>
+      <button id="nextMonthBtn" class="icon-btn">Next <i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="calendar-grid" id="calendarDaysGrid"></div>
+    <div style="margin-top: 1rem; font-size:0.75rem; background:#f8fafc; padding: 0.5rem; border-radius: 1rem;">
+      <span style="background:#c8e6d9; padding:0.2rem 0.6rem; border-radius:20px;">🟢 Present</span>
+      <span style="background:#ffe0db; padding:0.2rem 0.6rem; border-radius:20px;">🔴 Absent</span>
+      <span style="background:#e2e8f0; padding:0.2rem 0.6rem; border-radius:20px;">⚪ Off-day</span>
+      <span style="background:#f1f5f9; padding:0.2rem 0.6rem;">⬜ Not marked</span>
+      <span style="margin-left: 0.5rem;">👉 Tap date to cycle status</span>
+    </div>
+  </div>
+</div>
+
+<div id="toastMsg" class="toast">✓ Updated</div>
+
+<script>
+  // ---------- STORAGE ----------
+  const STORAGE_KEY = "attendance_smart_system";
+  
+  let subjects = []; // each: { id, name, category, requiredPercent, dateRecords: { "YYYY-MM-DD": "present"/"absent"/"offday" } }
+
+  // Helper: generate unique id
+  function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 6); }
+
+  // Load / Save
+  function loadData() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        subjects = JSON.parse(raw);
+        if (!Array.isArray(subjects)) subjects = [];
+      } catch(e) { subjects = []; }
+    }
+    if (subjects.length === 0) {
+      // default subjects as per image: CPDP, WP, TOC, MIA, AJAVA
+      subjects = [
+        { id: generateId(), name: "CPDP", category: "Theory", requiredPercent: 75, dateRecords: {} },
+        { id: generateId(), name: "WP", category: "Theory", requiredPercent: 75, dateRecords: {} },
+        { id: generateId(), name: "TOC", category: "Theory", requiredPercent: 75, dateRecords: {} },
+        { id: generateId(), name: "MIA", category: "Theory", requiredPercent: 15, dateRecords: {} },
+        { id: generateId(), name: "AJAVA", category: "Lab", requiredPercent: 75, dateRecords: {} }
+      ];
+      saveData();
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(subjects));
+  }
+
+  // compute attended & missed from dateRecords (only present/absent counts)
+  function computeStats(subject) {
+    let attended = 0, missed = 0;
+    const records = subject.dateRecords || {};
+    for (const status of Object.values(records)) {
+      if (status === 'present') attended++;
+      else if (status === 'absent') missed++;
+    }
+    const total = attended + missed;
+    const percentage = total === 0 ? 0 : (attended / total) * 100;
+    return { attended, missed, total, percentage };
+  }
+
+  // "Can miss X more classes" or need more attendance
+  function getAdvice(subject, attended, missed, requiredPercent) {
+    const total = attended + missed;
+    if (total === 0) return `Need ${Math.ceil(requiredPercent/100 * 1)} class(es) to start`;
+    const currentPercent = (attended / total) * 100;
+    if (currentPercent >= requiredPercent) {
+      // can miss some classes while staying above required?
+      // max missed = floor( (attended * 100 / requiredPercent) - total )
+      const maxTotal = (attended * 100) / requiredPercent;
+      const allowedMissed = Math.floor(maxTotal - total);
+      if (allowedMissed <= 0) return "⚠️ At threshold, don't miss any";
+      return `✨ Can miss ${allowedMissed} more class(es)`;
+    } else {
+      // need extra attendance
+      const neededAttendance = Math.ceil((requiredPercent * total - 100 * attended) / (100 - requiredPercent));
+      if (neededAttendance <= 0) return "✔️ On track";
+      return `📈 Need ${neededAttendance} consecutive present(s)`;
+    }
+  }
+
+  // render dashboard
+  function renderDashboard() {
+    const container = document.getElementById("subjectsGrid");
+    if (!container) return;
+    if (subjects.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;">➕ Click 'New Subject' to start</div>`;
+      return;
+    }
+    let html = "";
+    subjects.forEach(sub => {
+      const { attended, missed, percentage } = computeStats(sub);
+      const req = sub.requiredPercent;
+      const advice = getAdvice(sub, attended, missed, req);
+      const percentDisplay = percentage.toFixed(1);
+      let percentColor = "#1e6f3f";
+      if (percentage < req) percentColor = "#c2410c";
+      else if (percentage >= req) percentColor = "#2b6e3c";
+      html += `
+        <div class="subject-card" data-id="${sub.id}">
+          <div class="card-header">
+            <span class="subject-name">${escapeHtml(sub.name)}</span>
+            <span class="category-badge"><i class="fas ${sub.category === 'Lab' ? 'fa-flask' : 'fa-book'}"></i> ${escapeHtml(sub.category)}</span>
+          </div>
+          <div class="stats-row">
+            <div class="stat"><div class="stat-value">${attended}</div><div class="stat-label">Attended</div></div>
+            <div class="stat"><div class="stat-value">${missed}</div><div class="stat-label">Missed</div></div>
+            <div class="stat"><div class="percentage-circle" style="color:${percentColor}">${percentDisplay}%</div><div class="stat-label">Current</div></div>
+          </div>
+          <div class="req-info">
+            <span><i class="fas fa-chart-line"></i> Required: ${req}%</span>
+            <span class="req-text">${advice}</span>
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn calendar-action" data-id="${sub.id}" title="Mark attendance calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
+            <button class="icon-btn edit-subject" data-id="${sub.id}" title="Edit subject"><i class="fas fa-edit"></i></button>
+            <button class="icon-btn delete-btn" data-id="${sub.id}" title="Delete subject"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+    // attach events
+    document.querySelectorAll('.calendar-action').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        openCalendarForSubject(id);
+      });
+    });
+    document.querySelectorAll('.edit-subject').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        openEditModal(id);
+      });
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        if (confirm("Delete subject and ALL attendance records?")) {
+          subjects = subjects.filter(s => s.id !== id);
+          saveData();
+          renderDashboard();
+          showToast(`🗑️ Subject removed`);
+        }
+      });
+    });
+  }
+
+  function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+  // ---------- Calendar logic (per subject) ----------
+  let currentCalendarSubject = null;
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth(); // 0-11
+
+  function openCalendarForSubject(subjectId) {
+    const subject = subjects.find(s => s.id === subjectId);
+    if (!subject) return;
+    currentCalendarSubject = subject;
+    document.getElementById("calSubjectName").innerHTML = `<i class="fas fa-calendar-week"></i> ${escapeHtml(subject.name)} · Attendance`;
+    // reset to today's year/month
+    const today = new Date();
+    currentYear = today.getFullYear();
+    currentMonth = today.getMonth();
+    renderCalendarGrid();
+    document.getElementById("calendarModal").style.display = "flex";
+  }
+
+  function renderCalendarGrid() {
+    if (!currentCalendarSubject) return;
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const startWeekday = firstDay.getDay(); // 0 sun
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    document.getElementById("monthYearDisplay").innerText = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    let gridHtml = "";
+    // empty cells for offset
+    for (let i = 0; i < startWeekday; i++) {
+      gridHtml += `<div class="cal-day" style="background:transparent; box-shadow:none;"></div>`;
+    }
+    const records = currentCalendarSubject.dateRecords || {};
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      let status = records[dateStr] || null;
+      let statusClass = "";
+      let statusText = d;
+      if (status === 'present') statusClass = "present";
+      else if (status === 'absent') statusClass = "absent";
+      else if (status === 'offday') statusClass = "offday";
+      gridHtml += `<div class="cal-day ${statusClass}" data-date="${dateStr}" data-status="${status || ''}">${d}</div>`;
+    }
+    const grid = document.getElementById("calendarDaysGrid");
+    grid.innerHTML = gridHtml;
+    // attach click events to each day
+    grid.querySelectorAll('.cal-day').forEach(dayDiv => {
+      const date = dayDiv.getAttribute('data-date');
+      if (!date) return;
+      dayDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cycleAttendanceStatus(date);
+      });
+    });
+  }
+
+  function cycleAttendanceStatus(dateStr) {
+    if (!currentCalendarSubject) return;
+    if (!currentCalendarSubject.dateRecords) currentCalendarSubject.dateRecords = {};
+    const currentStatus = currentCalendarSubject.dateRecords[dateStr] || null;
+    let newStatus = null;
+    if (currentStatus === null) newStatus = 'present';
+    else if (currentStatus === 'present') newStatus = 'absent';
+    else if (currentStatus === 'absent') newStatus = 'offday';
+    else if (currentStatus === 'offday') newStatus = null;
+    
+    if (newStatus === null) {
+      delete currentCalendarSubject.dateRecords[dateStr];
+    } else {
+      currentCalendarSubject.dateRecords[dateStr] = newStatus;
+    }
+    // update storage and re-render both calendar and dashboard
+    saveData();
+    renderCalendarGrid();      // refresh calendar UI
+    renderDashboard();         // update stats on main page
+    showToast(`📅 ${dateStr}: ${newStatus ? newStatus.toUpperCase() : 'Cleared'}`);
+  }
+
+  // ---------- Subject Add / Edit Modal ----------
+  let modalMode = "add"; // add or edit
+  function openEditModal(subjectId) {
+    const sub = subjects.find(s => s.id === subjectId);
+    if (!sub) return;
+    document.getElementById("editSubjectId").value = sub.id;
+    document.getElementById("subjName").value = sub.name;
+    document.getElementById("subjCategory").value = sub.category;
+    document.getElementById("reqPercent").value = sub.requiredPercent;
+    document.getElementById("modalTitle").innerText = "Edit Subject";
+    modalMode = "edit";
+    document.getElementById("subjectModal").style.display = "flex";
+  }
+
+  function openAddModal() {
+    document.getElementById("editSubjectId").value = "";
+    document.getElementById("subjName").value = "";
+    document.getElementById("subjCategory").value = "Theory";
+    document.getElementById("reqPercent").value = "75";
+    document.getElementById("modalTitle").innerText = "Add Subject";
+    modalMode = "add";
+    document.getElementById("subjectModal").style.display = "flex";
+  }
+
+  function saveSubjectFromModal() {
+    const name = document.getElementById("subjName").value.trim();
+    if (!name) { showToast("Subject name required"); return; }
+    const category = document.getElementById("subjCategory").value;
+    let reqPercent = parseInt(document.getElementById("reqPercent").value, 10);
+    if (isNaN(reqPercent)) reqPercent = 75;
+    reqPercent = Math.min(100, Math.max(0, reqPercent));
+    
+    if (modalMode === "add") {
+      // avoid duplicate names (case insensitive)
+      if (subjects.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+        showToast("Subject already exists!");
+        return;
+      }
+      const newSubject = {
+        id: generateId(),
+        name: name,
+        category: category,
+        requiredPercent: reqPercent,
+        dateRecords: {}
+      };
+      subjects.push(newSubject);
+      showToast(`➕ Added ${name}`);
+    } else {
+      const editId = document.getElementById("editSubjectId").value;
+      const idx = subjects.findIndex(s => s.id === editId);
+      if (idx !== -1) {
+        // avoid duplicate name conflict with other subjects
+        if (subjects.some((s, i) => i !== idx && s.name.toLowerCase() === name.toLowerCase())) {
+          showToast("Another subject with same name exists!");
+          return;
+        }
+        subjects[idx].name = name;
+        subjects[idx].category = category;
+        subjects[idx].requiredPercent = reqPercent;
+        showToast(`✏️ Updated ${name}`);
+      }
+    }
+    saveData();
+    renderDashboard();
+    document.getElementById("subjectModal").style.display = "none";
+  }
+
+  // helper toast
+  function showToast(msg) {
+    const toast = document.getElementById("toastMsg");
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    setTimeout(() => { toast.style.opacity = "0"; }, 1500);
+  }
+
+  // Month navigation for calendar modal
+  function prevMonth() {
+    if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+    else currentMonth--;
+    renderCalendarGrid();
+  }
+  function nextMonth() {
+    if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+    else currentMonth++;
+    renderCalendarGrid();
+  }
+
+  // Event listeners & init
+  document.addEventListener("DOMContentLoaded", () => {
+    loadData();
+    renderDashboard();
+    // modal controls
+    document.getElementById("openAddModalBtn").addEventListener("click", openAddModal);
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("subjectModal").style.display = "none";
+    });
+    document.getElementById("saveSubjectBtn").addEventListener("click", saveSubjectFromModal);
+    document.getElementById("closeCalendarBtn").addEventListener("click", () => {
+      document.getElementById("calendarModal").style.display = "none";
+      currentCalendarSubject = null;
+    });
+    document.getElementById("prevMonthBtn").addEventListener("click", prevMonth);
+    document.getElementById("nextMonthBtn").addEventListener("click", nextMonth);
+    window.addEventListener("click", (e) => {
+      const modal = document.getElementById("calendarModal");
+      if (e.target === modal) modal.style.display = "none";
+      const subjectModal = document.getElementById("subjectModal");
+      if (e.target === subjectModal) subjectModal.style.display = "none";
+    });
+  });
+</script>
+</body>
+</html>
